@@ -627,11 +627,19 @@ static picoos_int32 tok_tokenDigitStrToInt (picodata_ProcessingUnit this, pr_sub
     picoos_uint32 n;
     picobase_utf8char utf8char;
 
+    /* Add null check to prevent crashes */
+    if (stokenStr == NULL) {
+        return 0;
+    }
+
     val = 0;
     i = 0;
     l = pr_strlen(stokenStr);
     while (i < l) {
-        picobase_get_next_utf8char(stokenStr, PR_MAX_DATA_LEN, & i, utf8char);
+        if (!picobase_get_next_utf8char(stokenStr, PR_MAX_DATA_LEN, & i, utf8char)) {
+            /* Handle error case - break out of loop on failure */
+            break;
+        }
         id = picoktab_graphOffset(pr->graphs, utf8char);
         if (id > 0) {
           if (picoktab_getIntPropValue(pr->graphs, id, &n)) {
@@ -669,7 +677,10 @@ static picoos_bool pr_isLatinNumber (picoos_uchar str[], picoos_int32 * val)
     llen = picobase_utf8_length(str, PR_MAX_DATA_LEN);
     if (llen > 0) {
         li = 0;
-        picobase_get_next_utf8char(str, PR_MAX_DATA_LEN, & li,utf8);
+        if (!picobase_get_next_utf8char(str, PR_MAX_DATA_LEN, & li,utf8)) {
+            /* Handle error case - fail the function */
+            return FALSE;
+        }
         if (picobase_is_utf8_uppercase(utf8, PICOBASE_UTF8_MAXLEN)) {
             llatinI = 'I';
             llatinV = 'V';

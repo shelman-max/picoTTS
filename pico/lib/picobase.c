@@ -960,6 +960,18 @@ picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
     picoos_uint8 len;
     picoos_uint32 poscnt;
 
+    /* Add input validation to prevent crashes */
+    if (utf8s == NULL || pos == NULL || utf8char == NULL) {
+        if (utf8char != NULL) utf8char[0] = 0;
+        return FALSE;
+    }
+    
+    /* Check bounds before accessing utf8s[*pos] */
+    if (*pos >= utf8slenmax) {
+        utf8char[0] = 0;
+        return FALSE;
+    }
+
     utf8char[0] = 0;
     len = picobase_det_utf8_length(utf8s[*pos]);
     if ((((*pos) + len) > utf8slenmax) ||
@@ -989,6 +1001,16 @@ picoos_uint8 picobase_get_next_utf8charpos(const picoos_uint8 *utf8s,
     picoos_uint8 len;
     picoos_uint32 poscnt;
 
+    /* Add input validation to prevent crashes */
+    if (utf8s == NULL || pos == NULL) {
+        return FALSE;
+    }
+    
+    /* Check bounds before accessing utf8s[*pos] */
+    if (*pos >= utf8slenmax) {
+        return FALSE;
+    }
+
     len = picobase_det_utf8_length(utf8s[*pos]);
     if ((((*pos) + len) > utf8slenmax) ||
         (len > PICOBASE_UTF8_MAXLEN)){
@@ -1015,6 +1037,12 @@ picoos_uint8 picobase_get_prev_utf8char(const picoos_uint8 *utf8s,
     picoos_uint8 i, j;
     picoos_uint8 len;
     picoos_uint32 poscnt;
+
+    /* Add input validation to prevent crashes */
+    if (utf8s == NULL || pos == NULL || utf8char == NULL) {
+        if (utf8char != NULL) utf8char[0] = 0;
+        return FALSE;
+    }
 
     utf8char[0] = 0;
     if ((*pos) == 0) {
@@ -1045,6 +1073,11 @@ picoos_uint8 picobase_get_prev_utf8charpos(const picoos_uint8 *utf8s,
     picoos_uint8 i;
     picoos_uint8 len;
     picoos_uint32 poscnt;
+
+    /* Add input validation to prevent crashes */
+    if (utf8s == NULL || pos == NULL) {
+        return FALSE;
+    }
 
     if ((*pos) == 0) {
         return FALSE;
