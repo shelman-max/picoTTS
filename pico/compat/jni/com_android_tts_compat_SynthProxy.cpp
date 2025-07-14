@@ -30,7 +30,7 @@
 
 #include "tts.h"
 
-// 64位JNI适配
+// 64-bit JNI adaptation
 #ifdef PICO_64BIT_SUPPORT
     #define JLONG_TO_PTR(jlong_val) ((void*)(uintptr_t)(jlong_val))
     #define PTR_TO_JLONG(ptr) ((jlong)(uintptr_t)(ptr))

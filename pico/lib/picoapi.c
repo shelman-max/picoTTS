@@ -82,7 +82,7 @@ pico_Status pico_initialize_priv(
     PICODBG_ENABLE_COLORS(0);
     /*PICODBG_SET_OUTPUT_FORMAT((PICODBG_SHOW_LEVEL | PICODBG_SHOW_SRCNAME));*/
     
-    /* 64位架构检测 */
+    /* 64-bit architecture detection */
     #ifdef PICO_ARCH_INFO
         #ifdef PICO_64BIT_SUPPORT
             PICODBG_INFO(("PicoTTS initializing in 64-bit mode"));

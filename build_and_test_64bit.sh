@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# PicoTTS 64位适配构建和测试脚本
-# 使用方法: ./build_and_test_64bit.sh [clean|build|test|all]
+# PicoTTS 64-bit adaptation build and test script
+# Usage: ./build_and_test_64bit.sh [clean|build|test|all]
 
 set -e
 
-# 颜色定义
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 日志函数
+# Logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -29,54 +29,54 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 检查环境
+# Check environment
 check_environment() {
-    log_info "检查构建环境..."
+    log_info "Checking build environment..."
     
     if [ -z "$ANDROID_BUILD_TOP" ]; then
-        log_error "ANDROID_BUILD_TOP 未设置，请运行 source build/envsetup.sh"
+        log_error "ANDROID_BUILD_TOP not set, please run source build/envsetup.sh"
         exit 1
     fi
     
     if [ ! -d "$ANDROID_BUILD_TOP" ]; then
-        log_error "Android构建目录不存在: $ANDROID_BUILD_TOP"
+        log_error "Android build directory does not exist: $ANDROID_BUILD_TOP"
         exit 1
     fi
     
-    # 检查是否在正确的目录
+    # Check if in correct directory
     if [ ! -f "pico/Android.mk" ]; then
-        log_error "请在svox项目根目录运行此脚本"
-        log_info "当前目录: $(pwd)"
+        log_error "Please run this script from svox project root directory"
+        log_info "Current directory: $(pwd)"
         exit 1
     fi
     
-    log_success "环境检查通过"
+    log_success "Environment check passed"
 }
 
-# 清理构建
+# Clean build
 clean_build() {
-    log_info "清理PicoTTS构建..."
+    log_info "Cleaning PicoTTS build..."
     
     cd "$ANDROID_BUILD_TOP"
     
-    # 清理PicoTTS相关的构建产物
+    # Clean PicoTTS related build artifacts
     rm -rf out/target/product/*/obj/SHARED_LIBRARIES/libttspico_intermediates/
     rm -rf out/target/product/*/obj/SHARED_LIBRARIES/libttscompat_intermediates/
     rm -rf out/target/product/*/obj/STATIC_LIBRARIES/libsvoxpico_intermediates/
     rm -rf out/target/product/*/obj/STATIC_LIBRARIES/libttspico_engine_intermediates/
     rm -rf out/target/product/*/obj/APPS/PicoTts_intermediates/
     
-    # 清理已安装的文件
+    # Clean installed files
     rm -f out/target/product/*/system/app/PicoTts/PicoTts.apk
     rm -f out/target/product/*/system/lib*/libttspico.so
     rm -f out/target/product/*/system/lib*/libttscompat.so
     
-    log_success "清理完成"
+    log_success "Cleanup completed"
 }
 
-# 构建PicoTTS
+# Build PicoTTS
 build_pico() {
-    log_info "构建PicoTTS (支持32位和64位)..."
+    log_info "Building PicoTTS (32-bit and 64-bit support)..."
     
     cd "$ANDROID_BUILD_TOP"
     
@@ -267,17 +267,17 @@ show_help() {
     echo "  build     - 构建PicoTTS"
     echo "  verify    - 验证构建结果"
     echo "  install   - 安装到设备"
-    echo "  test      - 运行时测试"
-    echo "  all       - 运行完整测试流程"
-    echo "  help      - 显示此帮助信息"
+    echo "  test      - Runtime testing"
+    echo "  all       - Run complete test process"
+    echo "  help      - Show this help information"
     echo ""
-    echo "示例:"
-    echo "  $0 all         # 运行完整测试"
-    echo "  $0 build       # 仅构建"
-    echo "  $0 test        # 仅运行测试"
+    echo "Examples:"
+    echo "  $0 all         # Run complete test"
+    echo "  $0 build       # Build only"
+    echo "  $0 test        # Test only"
 }
 
-# 主函数
+# Main function
 main() {
     case "${1:-all}" in
         "clean")
