@@ -960,11 +960,19 @@ picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
     picoos_uint8 len;
     picoos_uint32 poscnt;
 
-    /* Enhanced input validation to prevent crashes */
+    /* 64位适配：增强输入验证 */
     if (utf8s == NULL || pos == NULL || utf8char == NULL) {
         if (utf8char != NULL) utf8char[0] = 0;
         return FALSE;
     }
+    
+    /* 64位适配：检查指针对齐 */
+    #ifdef PICO_64BIT_SUPPORT
+    if (((picoos_ptr_t)utf8s & 0x3) != 0) {
+        /* 指针未对齐，可能在64位系统上有问题 */
+        /* PICODBG_WARN(("UTF-8 buffer not aligned on 64-bit system")); */
+    }
+    #endif
     
     /* Check bounds before accessing utf8s[*pos] */
     if (*pos >= utf8slenmax) {
@@ -974,6 +982,8 @@ picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
 
     utf8char[0] = 0;
     len = picobase_det_utf8_length(utf8s[*pos]);
+    
+    /* 64位适配：增强长度检查 */
     if ((((*pos) + len) > utf8slenmax) ||
         (len > PICOBASE_UTF8_MAXLEN) ||
         (len == 0)) {  /* Additional check for invalid UTF-8 */
@@ -982,8 +992,13 @@ picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
 
     poscnt = *pos;
     i = 0;
-    /* Enhanced loop with bounds checking to prevent accessing invalid memory */
-    while ((i < len) && (poscnt < utf8slenmax) && (utf8s[poscnt] != 0)) {
+    
+    /* 64位适配：内存安全的字符复制 */
+    while ((i < len) && (poscnt < utf8slenmax)) {
+        /* 额外的边界检查 */
+        if (poscnt >= utf8slenmax || i >= PICOBASE_UTF8_MAXLEN) {
+            break;
+        }
         utf8char[i] = utf8s[poscnt];
         poscnt++;
         i++;

@@ -13,9 +13,17 @@ svox_tts_warn_flags := \
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libttspico_engine
-LOCAL_MULTILIB := 32
+LOCAL_MULTILIB := both
 
-LOCAL_CFLAGS := $(svox_tts_warn_flags)
+LOCAL_CFLAGS := $(svox_tts_warn_flags) -DPICO_ARCH_INFO
+
+# 64位架构支持
+ifeq ($(TARGET_ARCH),arm64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_ARM64
+endif
+ifeq ($(TARGET_ARCH),x86_64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_X86_64
+endif
 
 LOCAL_SRC_FILES := \
 	com_svox_picottsengine.cpp \
@@ -46,14 +54,22 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libttspico
-LOCAL_MULTILIB := 32
+LOCAL_MULTILIB := both
 	
 LOCAL_SRC_FILES := \
 	com_svox_picottsengine.cpp \
 	svox_ssml_parser.cpp \
     strdup8to16.c \
     strdup16to8.c
-LOCAL_CFLAGS := $(svox_tts_warn_flags)
+LOCAL_CFLAGS := $(svox_tts_warn_flags) -DPICO_ARCH_INFO
+
+# 64位架构支持
+ifeq ($(TARGET_ARCH),arm64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_ARM64
+endif
+ifeq ($(TARGET_ARCH),x86_64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_X86_64
+endif
 
 LOCAL_C_INCLUDES += \
 	external/svox/pico/lib \

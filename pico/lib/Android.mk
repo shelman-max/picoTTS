@@ -4,7 +4,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libsvoxpico
-LOCAL_MULTILIB := 32
+LOCAL_MULTILIB := both
 
 LOCAL_SRC_FILES := \
 	picoacph.c \
@@ -48,6 +48,15 @@ LOCAL_CFLAGS += \
     -Wno-sign-compare \
     -Wno-unneeded-internal-declaration \
     -Wno-unused-parameter \
+    -DPICO_ARCH_INFO
+
+# 64位架构支持
+ifeq ($(TARGET_ARCH),arm64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_ARM64
+endif
+ifeq ($(TARGET_ARCH),x86_64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_X86_64
+endif
 
 include $(BUILD_STATIC_LIBRARY)
 

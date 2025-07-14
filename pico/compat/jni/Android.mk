@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE:= libttscompat
-LOCAL_MULTILIB := 32
+LOCAL_MULTILIB := both
 
 LOCAL_SRC_FILES:= \
 	com_android_tts_compat_SynthProxy.cpp
@@ -22,6 +22,15 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_CFLAGS := \
     -Wall -Werror \
-    -Wno-unused-parameter
+    -Wno-unused-parameter \
+    -DPICO_ARCH_INFO
+
+# 64位架构支持
+ifeq ($(TARGET_ARCH),arm64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_ARM64
+endif
+ifeq ($(TARGET_ARCH),x86_64)
+    LOCAL_CFLAGS += -DPICO_64BIT_SUPPORT -DPICO_X86_64
+endif
 
 include $(BUILD_SHARED_LIBRARY)
