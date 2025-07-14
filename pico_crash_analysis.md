@@ -176,3 +176,103 @@ static picoos_int32 tok_tokenDigitStrToInt (picodata_ProcessingUnit this, pr_sub
 - Maintain backward compatibility for valid inputs
 - Gracefully handle invalid inputs instead of crashing
 - Follow existing error handling patterns in the codebase
+
+---
+
+## UPDATE: Additional Crash Analysis (July 14, 2025)
+
+### New Crash Information
+A new crash has been reported with slightly different characteristics:
+
+```
+07-14 15:46:17.445  4983  4983 F DEBUG   : signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x607dd69c
+07-14 15:46:17.445  4983  4983 F DEBUG   :     r0  607dd69c  r1  000000ff  r2  e07d60f4  r3  e07d60f8
+07-14 15:46:17.445  4983  4983 F DEBUG   :       #00 pc 00012782  /system/lib/libttspico.so (picobase_get_next_utf8char+26)
+07-14 15:46:17.445  4983  4983 F DEBUG   :       #01 pc 0001b34d  /system/lib/libttspico.so (pr_processToken+796)
+```
+
+### Key Differences from Previous Crash
+1. **Crash Offset**: Now at `+26` instead of `+10`
+2. **Fault Address**: `0x607dd69c` (different from previous `0x5f99d67c`)
+3. **Same Call Stack**: Still in `pr_processToken` → `picobase_get_next_utf8char`
+
+### Analysis of New Crash
+The change from `+10` to `+26` offset suggests that the initial input validation fixes are working (the function is getting past the early validation checks), but the crash is now occurring later in the function, likely in the character copying loop:
+
+```c
+while ((i < len) && (utf8s[poscnt] != 0)) {
+    utf8char[i] = utf8s[poscnt];  // <- POTENTIAL CRASH LOCATION
+    poscnt++;
+    i++;
+}
+```
+
+### Enhanced Fix Required
+The current fix may be incomplete. We need to add additional bounds checking within the loop to prevent `poscnt` from exceeding `utf8slenmax`:
+
+```c
+picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
+                                        const picoos_uint32 utf8slenmax,
+                                        picoos_uint32 *pos,
+                                        picobase_utf8char utf8char) {
+    picoos_uint8 i;
+    picoos_uint8 len;
+    picoos_uint32 poscnt;
+
+    /* Enhanced input validation */
+    if (utf8s == NULL || pos == NULL || utf8char == NULL) {
+        if (utf8char != NULL) utf8char[0] = 0;
+        return FALSE;
+    }
+    
+    /* Check bounds before accessing utf8s[*pos] */
+    if (*pos >= utf8slenmax) {
+        utf8char[0] = 0;
+        return FALSE;
+    }
+
+    utf8char[0] = 0;
+    len = picobase_det_utf8_length(utf8s[*pos]);
+    if ((((*pos) + len) > utf8slenmax) ||
+        (len > PICOBASE_UTF8_MAXLEN) ||
+        (len == 0)) {  /* Additional check for invalid UTF-8 */
+        return FALSE;
+    }
+
+    poscnt = *pos;
+    i = 0;
+    /* Enhanced loop with bounds checking */
+    while ((i < len) && (poscnt < utf8slenmax) && (utf8s[poscnt] != 0)) {
+        utf8char[i] = utf8s[poscnt];
+        poscnt++;
+        i++;
+    }
+    
+    utf8char[i] = 0;
+    
+    /* Check if we completed the character successfully */
+    if (i < len) {
+        return FALSE;  /* Incomplete character */
+    }
+    
+    *pos = poscnt;
+    return TRUE;
+}
+```
+
+### Additional Recommendations
+
+1. **Memory Corruption Investigation**: The different fault addresses suggest possible memory corruption issues elsewhere in the codebase that are affecting the input data.
+
+2. **Input Data Validation**: Add logging or debugging to track what kind of input data is being passed to `picobase_get_next_utf8char` when crashes occur.
+
+3. **Defensive Programming**: Consider adding more defensive checks in the calling functions to validate string integrity before passing to UTF-8 parsing functions.
+
+4. **Runtime Debugging**: Use tools like AddressSanitizer or Valgrind to detect memory corruption issues during development.
+
+### Priority Actions
+
+1. **Immediate**: Apply the enhanced bounds checking fix above
+2. **Short-term**: Add comprehensive input validation logging 
+3. **Medium-term**: Investigate potential memory corruption in calling code
+4. **Long-term**: Consider refactoring UTF-8 handling to use safer string handling libraries

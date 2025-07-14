@@ -960,7 +960,7 @@ picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
     picoos_uint8 len;
     picoos_uint32 poscnt;
 
-    /* Add input validation to prevent crashes */
+    /* Enhanced input validation to prevent crashes */
     if (utf8s == NULL || pos == NULL || utf8char == NULL) {
         if (utf8char != NULL) utf8char[0] = 0;
         return FALSE;
@@ -975,21 +975,27 @@ picoos_uint8 picobase_get_next_utf8char(const picoos_uint8 *utf8s,
     utf8char[0] = 0;
     len = picobase_det_utf8_length(utf8s[*pos]);
     if ((((*pos) + len) > utf8slenmax) ||
-        (len > PICOBASE_UTF8_MAXLEN)) {
+        (len > PICOBASE_UTF8_MAXLEN) ||
+        (len == 0)) {  /* Additional check for invalid UTF-8 */
         return FALSE;
     }
 
     poscnt = *pos;
     i = 0;
-    while ((i < len) && (utf8s[poscnt] != 0)) {
+    /* Enhanced loop with bounds checking to prevent accessing invalid memory */
+    while ((i < len) && (poscnt < utf8slenmax) && (utf8s[poscnt] != 0)) {
         utf8char[i] = utf8s[poscnt];
         poscnt++;
         i++;
     }
+    
     utf8char[i] = 0;
-    if ((i < len) && (utf8s[poscnt] == 0)) {
-        return FALSE;
+    
+    /* Check if we completed the character successfully */
+    if (i < len) {
+        return FALSE;  /* Incomplete character */
     }
+    
     *pos = poscnt;
     return TRUE;
 }
