@@ -30,6 +30,15 @@
 
 #include "tts.h"
 
+// 64位JNI适配
+#ifdef PICO_64BIT_SUPPORT
+    #define JLONG_TO_PTR(jlong_val) ((void*)(uintptr_t)(jlong_val))
+    #define PTR_TO_JLONG(ptr) ((jlong)(uintptr_t)(ptr))
+#else
+    #define JLONG_TO_PTR(jlong_val) ((void*)(long)(jlong_val))
+    #define PTR_TO_JLONG(ptr) ((jlong)(long)(ptr))
+#endif
+
 #define DEFAULT_TTS_RATE        16000
 #define DEFAULT_TTS_BUFFERSIZE  2048
 

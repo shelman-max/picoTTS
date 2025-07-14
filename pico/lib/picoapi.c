@@ -81,6 +81,22 @@ pico_Status pico_initialize_priv(
     PICODBG_INITIALIZE(PICODBG_LOG_LEVEL_INFO);
     PICODBG_ENABLE_COLORS(0);
     /*PICODBG_SET_OUTPUT_FORMAT((PICODBG_SHOW_LEVEL | PICODBG_SHOW_SRCNAME));*/
+    
+    /* 64位架构检测 */
+    #ifdef PICO_ARCH_INFO
+        #ifdef PICO_64BIT_SUPPORT
+            PICODBG_INFO(("PicoTTS initializing in 64-bit mode"));
+            PICODBG_INFO(("Pointer size: %u bytes", (unsigned int)sizeof(void*)));
+            #ifdef PICO_ARM64
+                PICODBG_INFO(("Architecture: ARM64"));
+            #elif defined(PICO_X86_64)
+                PICODBG_INFO(("Architecture: x86_64"));
+            #endif
+        #else
+            PICODBG_INFO(("PicoTTS initializing in 32-bit mode"));
+            PICODBG_INFO(("Pointer size: %u bytes", (unsigned int)sizeof(void*)));
+        #endif
+    #endif
 
     if (memory == NULL) {
         status = PICO_ERR_NULLPTR_ACCESS;
