@@ -46,7 +46,7 @@ typedef picoos_uint8  picobase_utf8;
 typedef picoos_uint16 picobase_utf16;
 typedef picoos_uint32 picobase_utf32;
 
-/* 64位系统适配 */
+/* 64-bit system adaptation */
 #ifdef PICO_64BIT_SUPPORT
     #include <stdint.h>
     typedef uint64_t picoos_ptr_t;
@@ -56,7 +56,7 @@ typedef picoos_uint32 picobase_utf32;
     typedef int32_t picoos_sptr_t;
 #endif
 
-/* 指针安全的转换宏 */
+/* Pointer-safe conversion macros */
 #define PICO_PTR_TO_UINT(ptr) ((picoos_ptr_t)(ptr))
 #define PICO_UINT_TO_PTR(val) ((void*)(picoos_ptr_t)(val))
 
