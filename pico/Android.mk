@@ -11,6 +11,7 @@ LOCAL_PACKAGE_NAME := PicoTts
 LOCAL_MULTILIB := 32
 #LOCAL_SDK_VERSION := current
 LOCAL_PRIVATE_PLATFORM_APIS := true
+LOCAL_REQUIRED_MODULES := libttspico libttscompat
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src) \
     $(call all-java-files-under, compat)
